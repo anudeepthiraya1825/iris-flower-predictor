@@ -1,20 +1,28 @@
+import streamlit as st
+import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-import joblib
-from google.colab import files
 
-# Load dataset
-iris = load_iris()
-X = iris.data
-y = iris.target
+st.title("🌸 Iris Flower Predictor")
 
-# spliting the data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-model = RandomForestClassifier()
-model.fit(X_train, y_train)
+@st.cache_data
+def train_model():
+    iris = load_iris()
+    X = iris.data
+    y = iris.target
+    model = RandomForestClassifier()
+    model.fit(X, y)
+    return model, iris
 
-joblib.dump(model, "iris_model.pkl")
+model, iris = train_model()
 
+sepal_length = st.number_input("Sepal Length (cm)", 0.0, 10.0)
+sepal_width = st.number_input("Sepal Width (cm)", 0.0, 10.0)
+petal_length = st.number_input("Petal Length (cm)", 0.0, 10.0)
+petal_width = st.number_input("Petal Width (cm)", 0.0, 10.0)
 
-files.download("iris_model.pkl")
+if st.button("Predict"):
+    input_data = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
+    prediction = model.predict(input_data)
+    species = iris.target_names
+    st.success(f"Predicted Species: 🌼 {species[prediction[0]].capitalize()}")
